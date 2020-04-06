@@ -1,0 +1,33 @@
+#!/bin/bash
+OUT_DIR="./results"
+
+q_file="qs"
+p_file="programmes"
+s_file="schools"
+
+underscore() {
+  sed -e "s/&/and/g" -e "s/\//_/g" -e "s/ /_/g" <(echo $1)
+}
+
+trim() {
+  echo -e "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+}
+
+generate() {
+  while IFS= read -r pivot
+  do
+    echo "$pivot"
+    val=$(trim "$pivot") # trim whitespace
+    x=$(printf "%q" "$val") # escape special strings (except forward slash)
+    n=$(echo "${x//\//\\\/}") # escape forward slash
+    while IFS= read -r q
+    do
+      out_file="$OUT_DIR/$(underscore "$val")-$q.csv"
+      of=$(echo "${out_file//\//\\\/}") # escape forward slash
+      sqlite3 rca.db < <(sed -e "s/\$OUT/$of/g" -e "s/\$COL/$2/g" -e "s/\$QUESTION/$q/g" -e "s/\$VAL/'$n'/g" gen.sql.tmpl)
+    done < "$q_file"
+  done < "$1"
+}
+
+generate $p_file "programme"
+generate $s_file "school"

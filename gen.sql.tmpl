@@ -1,0 +1,4 @@
+.headers on
+.mode csv
+.output $OUT
+select * from (select $COL, $QUESTION, count(*) as count from responses group by $COL, $QUESTION) where $COL=$VAL;
