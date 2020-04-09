@@ -2,7 +2,7 @@ all: convert generate
 
 .PHONY: convert
 convert:
-	cp 'data/Students for Students survey Result - Form Responses 1.csv' ./responses.csv
+	cp 'data/redacted.csv' ./responses.csv
 	python remove-null.py responses.csv # python2
 	python3 rename.py responses.csv
 	rm responses.csv
@@ -23,5 +23,6 @@ db:
 	-sqlite3 rca.db
 
 .PHONY: generate
-generate:
+generate: convert
 	bash generate
+	./gen-charts.py > charts.json
